@@ -7,4 +7,4 @@ channel.on 'test', ->
 
   console.log 'hearing origin', this.origin
 
-  return 'response'
+  return {resp: 'response'}

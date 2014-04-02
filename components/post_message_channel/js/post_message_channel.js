@@ -1,6 +1,5 @@
 (function($) {
     var __slice = [].slice, __push = [].push, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-;
 
     function Event() {
         this.length = 0;
@@ -91,12 +90,7 @@
         return promise;
     };
 
-    window.Deferred = Deferred;
-})(null);
-
-
-(function($) {
-    var __slice = [].slice, cid=0, promises = {}, channels = [], listening = false;
+    var cid=0, promises = {}, channels = [], listening = false;
 
     function getDeferred() {
         var dfd = new Deferred();
