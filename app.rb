@@ -1,4 +1,5 @@
 set :views, 'components'
+set :protection, :except => :frame_options
 
 helpers do
   def component_path f
