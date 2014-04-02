@@ -1,8 +1,105 @@
 (function($) {
+    var __slice = [].slice, __push = [].push, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+;
+
+    function Event() {
+        this.length = 0;
+    }
+
+    Event.prototype = {
+        slice: __slice,
+        indexOf: Array.prototype.indexOf
+    }
+
+    Event.prototype.push = function() {
+        if (this.triggered) {
+            var args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+
+            for (var i = 0; i < args.length; i+=1) {
+                args[i].apply(null, this.triggered);
+            }
+        }
+
+        return __push.apply(this, arguments);
+    };
+
+    Event.prototype.trigger = function() {
+        var args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+
+        var len = this.length;
+
+        this.triggered = args;
+
+        for (var i = 0; i < len; i += 1) {
+            this[i].apply(null, this.triggered);
+        }
+
+        return this;
+    }
+
+    function Deferred() {
+        this._on_resolved = new Event();
+        this._on_rejected = new Event();
+
+        this.then = __bind(this.then, this);
+        this.fail = __bind(this.fail, this);
+        this.resolve = __bind(this.resolve, this);
+        this.reject = __bind(this.reject, this);
+    }
+
+    Deferred.prototype.then = function() {
+        this._on_resolved.push.apply(this._on_resolved, arguments);
+        return this;
+    };
+
+    Deferred.prototype.success = Deferred.prototype.then;
+
+    Deferred.prototype.fail = function() {
+        this._on_resolved.push.apply(this._on_rejected, arguments);
+        return this;
+    };
+
+    Deferred.prototype.resolve = function() {
+        this._on_resolved.trigger.apply(this._on_resolved, arguments);
+        return this;
+    };
+
+    Deferred.prototype.reject = function() {
+        this._on_rejected.trigger.apply(this._on_rejected, arguments);
+        return this;
+    };
+
+    Deferred.prototype.promise = function() {
+        var _this = this, promise;
+
+        function fail() {
+            _this.fail.apply(_this, arguments);
+            return promise;
+        }
+
+        function then() {
+            _this.then.apply(_this,arguments);
+            return promise;
+        }
+
+        promise = {
+            fail: fail,
+            success: then,
+            then: then
+        };
+
+        return promise;
+    };
+
+    window.Deferred = Deferred;
+})(null);
+
+
+(function($) {
     var __slice = [].slice, cid=0, promises = {}, channels = [], listening = false;
 
     function getDeferred() {
-        var dfd = new $.Deferred();
+        var dfd = new Deferred();
 
         dfd.cid = ++cid;
         promises[dfd.cid] = dfd;
@@ -85,7 +182,7 @@
         if (data.cid_response && (data.cid_response in promises)) {
             var promise = promises[data.cid_response];
 
-            promise.resolve.call(ev, ev, data.response);
+            promise.resolve.call(null, ev, data.response);
         }
     };
 
@@ -130,4 +227,4 @@
     }
 
     window.Channel = Channel;
-})(jQuery);
+})(null);
