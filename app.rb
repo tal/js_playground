@@ -1,14 +1,5 @@
 set :views, 'components'
 
-EXT_MAP = {
-  'js' => ['js','coffee'],
-  'css' => ['.css','.scss']
-}
-
-COMPONENT_BLACKLIST = %w{
-  css
-}
-
 helpers do
   def component_path f
     File.expand_path(File.join("./components",f))
