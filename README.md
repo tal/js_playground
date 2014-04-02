@@ -8,12 +8,22 @@ My space to play around with frontend shit
 My reccomendation is to run this with [pow!](http://pow.cx). Then you can link this repo up to a hostname.
 
 eg:
+
 ```sh
 $ cd ~/.pow
 $ ln -s /path/to/myapp js
 ```
 
 Then you can access the components at `http://js.dev/my_component`
+
+If you want you can make multiple links and access the same code on different hostnames
+
+```sh
+$ cd ~/.pow
+$ ln -s /path/to/myapp js2
+```
+
+Makes `http://js.dev/my_component` and `http://js2.dev/my_component` the same.
 
 ## Using
 
