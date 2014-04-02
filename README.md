@@ -7,6 +7,14 @@ My space to play around with frontend shit
 
 My reccomendation is to run this with [pow!](http://pow.cx). Then you can link this repo up to a hostname.
 
+eg:
+```sh
+$ cd ~/.pow
+$ ln -s /path/to/myapp js
+```
+
+Then you can access the components at `http://js.dev/my_component`
+
 ## Using
 
 Each component lives in a folder inside components. The component in `components/foo` can be reached at the url `/foo`.

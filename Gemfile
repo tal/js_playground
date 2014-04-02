@@ -5,7 +5,7 @@ gem 'sinatra'
 gem 'sinatra-contrib'
 
 gem 'sass'
-gem 'rack-coffee'
+gem 'coffee-script'
 
 group :console do
   gem 'looksee'

@@ -11,9 +11,6 @@ GEM
     multi_json (1.9.2)
     paint (0.8.7)
     rack (1.5.2)
-    rack-coffee (1.0.3)
-      coffee-script
-      rack
     rack-protection (1.5.2)
       rack
     rack-test (0.6.2)
@@ -38,8 +35,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  coffee-script
   looksee
-  rack-coffee
   sass
   sinatra
   sinatra-contrib
