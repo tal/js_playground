@@ -1,6 +1,6 @@
 iframe = document.getElementById 'my_iframe'
 
-window.channel = new Channel(window: iframe.contentWindow);
+window.channel = new Channel(namespace: 'test');
 
 channel.on 'test', ->
   console.log 'hearing test', arguments

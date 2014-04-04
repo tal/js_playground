@@ -1,4 +1,6 @@
-(function($) {
+(function() {
+    'use strict';
+
     var __slice = [].slice, __push = [].push, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
     function Event() {
@@ -117,26 +119,49 @@
                 data = JSON.parse(ev.data);
             } catch(e) {}
 
+            // console.log('got data on: ', window.location.href, data);
+
             if (data) {
                 for (var i = channels.length - 1; i >= 0; i--) {
-                    channels[i].messageCallback(ev, data);
+                    channels[i].message_callback(ev, data);
                 }
             }
         },false);
     })();
 
+
+    /**
+     * [Channel description]
+     * @param {[type]} opts [description]
+     */
     function Channel(opts) {
+        opts || (opts = {});
+
         if (!(window.JSON && window.JSON.stringify && window.JSON.parse)) {
             throw('Must have JSON parsing and stringify');
         }
 
+        if (opts.iframe) {
+            opts.window = opts.iframe.contentWindow;
+
+            if (!opts.origin) {
+                var src = opts.iframe.src;
+
+                var match = src.match(/^(http(?:s)?:\/\/[\w_\-\.]+(?::\d+)?)\/?/);
+
+                if (match) {
+                  opts.origin = match[1];
+                }
+            }
+        }
+
         this.window = opts.window;
 
-        if (this.window === window) {
+        if (this.window && this.window === window) {
             throw('Cannot send messages to ones self');
         }
 
-        this.namespace = opts.namespace || '';
+        this.namespace = opts.namespace+':' || '';
         this.origin = opts.origin || '*';
 
         this.responders = {
@@ -146,8 +171,19 @@
         channels.push(this);
     }
 
-    Channel.prototype.messageCallback = function(ev, data) {
+    Channel.prototype.match_origin = function(other_origin) {
+        if (this.origin === '*') {
+            return true;
+        } else {
+            return this.origin === other_origin;
+        }
+    };
+
+    Channel.prototype.message_callback = function(ev, data) {
         var method;
+
+        if (this.window && (ev.source !== this.window)) return;
+        if (!this.match_origin(ev.origin)) return;
 
         if (data.method) {
             if (data.method.slice(0, this.namespace.length) === this.namespace) {
@@ -162,7 +198,7 @@
             var ret = method.apply(ev, args);
 
             if (method !== '_method_callback' && data.cid && typeof ret !== "undefined") {
-                this.trigger('_method_callback', {
+                this.trigger_on_window(ev.source, '_method_callback', {
                     cid_response: data.cid,
                     response: ret
                 });
@@ -170,7 +206,7 @@
         }
     };
 
-    // Since this is being triggerd by messageCallback 'this' should be the event;
+    // Since this is being triggerd by message_callback 'this' should be the event;
     Channel.prototype._method_callback = function(data) {
         var ev = this;
         if (data.cid_response && (data.cid_response in promises)) {
@@ -194,19 +230,31 @@
     };
 
     Channel.prototype.trigger = function trigger(/* method_name, args */) {
-        var args, method_name;
-        method_name = arguments[0];
-        args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+        var args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        args.unshift(this.window);
+        return this.trigger_on_window.apply(this,args);
+    };
+
+    Channel.prototype.trigger_on_window = function trigger_on_window(/* window, method_name, args */) {
+        var args, method_name, win;
+
+        win = arguments[0];
+        method_name = arguments[1];
+        args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
 
         var dfd = getDeferred();
 
-        var data = JSON.stringify({
-            method: this.namespace + method_name,
-            args: args,
-            cid: dfd.cid
-        });
+        try {
+            var data = JSON.stringify({
+                method: this.namespace + method_name,
+                args: args,
+                cid: dfd.cid
+            });
 
-        this.window.postMessage(data, this.origin);
+            win.postMessage(data, this.origin);
+        } catch(e) {
+            dfd.reject(e);
+        }
 
         return dfd.promise();
     };
@@ -221,4 +269,4 @@
     }
 
     window.Channel = Channel;
-})(null);
+})();

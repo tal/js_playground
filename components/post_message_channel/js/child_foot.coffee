@@ -1,4 +1,4 @@
-channel = new Channel(window: window.top);
+channel = new Channel(window: window.top, namespace: 'test');
 
 p = channel.trigger 'test', 1, 2
 
