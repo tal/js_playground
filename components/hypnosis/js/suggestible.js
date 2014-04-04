@@ -4,7 +4,7 @@
      return new Function("return ("+str+");").call();
   }
 
-  function Suggestive(options) {
+  function Suggestible(options) {
     var _this = this;
     this.sid = ++sid;
 
@@ -30,7 +30,7 @@
   }
 
   function listen_to_top_frame() {
-    new Suggestive({window: window.top})
+    new Suggestible({window: window.top})
   }
 
   function listen_to_iframe(iframe) {
@@ -48,10 +48,11 @@
 
     if (!win) throw("no content window passed or determined");
 
-    new Suggestive({window: win});
+    var sug = new Suggestible({window: win});
+    sug.env.iframe = iframe;
   }
 
-  exports.Suggestive = {
+  exports.Suggestible = {
     listen_to_iframe: listen_to_iframe,
     listen_to_top_frame: listen_to_top_frame
   };

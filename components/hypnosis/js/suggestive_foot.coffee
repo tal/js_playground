@@ -1,1 +1,1 @@
-Suggestive.listen_to_top_frame()
+Suggestible.listen_to_top_frame()
