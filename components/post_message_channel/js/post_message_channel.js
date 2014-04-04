@@ -108,7 +108,6 @@
         var eventer = window[eventMethod];
         var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
         // Listen to message from child window
-        var _this = this;
         eventer(messageEvent, function(ev) {
             var data;
             if (typeof ev.data !== 'string') return;
@@ -156,10 +155,10 @@
         this.window = opts.window;
 
         if (this.window && this.window === window) {
-            throw('Cannot send messages to ones self');
+            throw('Cannot send messages to one\'s self');
         }
 
-        this.namespace = opts.namespace+':' || '';
+        this.namespace = opts.namespace ? opts.namespace+':' : '';
         this.origin = opts.origin || '*';
 
         this.responders = {
@@ -266,6 +265,7 @@
     };
 
     Channel.prototype.off = function(method_name) {
+        if (method_name == '_method_callback') throw 'cannot disable the method callback responder';
         delete this.responders[method_name];
     }
 
