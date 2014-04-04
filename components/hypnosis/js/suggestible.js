@@ -30,7 +30,7 @@
   }
 
   function listen_to_top_frame() {
-    new Suggestible({window: window.top})
+    new Suggestible({window: window.top});
   }
 
   function listen_to_iframe(iframe) {

@@ -73,23 +73,21 @@
     Deferred.prototype.promise = function() {
         var _this = this, promise;
 
-        function fail() {
-            _this.fail.apply(_this, arguments);
-            return promise;
+        function Promise() {
+            this.fail = function fail() {
+                _this.fail.apply(_this, arguments);
+                return promise;
+            }
+
+            this.then = function then() {
+                _this.then.apply(_this,arguments);
+                return promise;
+            }
+
+            this.success = this.then;
         }
 
-        function then() {
-            _this.then.apply(_this,arguments);
-            return promise;
-        }
-
-        promise = {
-            fail: fail,
-            success: then,
-            then: then
-        };
-
-        return promise;
+        return new Promise();
     };
 
     var cid=0, promises = {}, channels = [], listening = false;
@@ -180,20 +178,23 @@
     };
 
     Channel.prototype.message_callback = function(ev, data) {
-        var method;
+        var method_name;
 
+        // If a window is defined only listen on that window
         if (this.window && (ev.source !== this.window)) return;
+        // If an origin is defined only listen if the origin matches
         if (!this.match_origin(ev.origin)) return;
 
+        // De-namespace the method and make sure it exists
         if (data.method) {
             if (data.method.slice(0, this.namespace.length) === this.namespace) {
-                method = data.method.slice(this.namespace.length, data.method.length);
+                method_name = data.method.slice(this.namespace.length, data.method.length);
             }
         }
 
-        if (method && (method in this.responders)) {
+        if (method_name && (method_name in this.responders)) {
             var args = data.args || [];
-            var method = this.responders[method];
+            var method = this.responders[method_name];
 
             var ret = method.apply(ev, args);
 
