@@ -1,7 +1,10 @@
-channel = new Channel(window: window.top, namespace: 'test');
+run = ->
+  window.channel = new Channel(window: window.top, namespace: 'test');
 
-p = channel.trigger 'test', 1, 2
+  p = channel.trigger 'test', 1, 2
 
-p.then (ev, resp) ->
-  console.log 'promise', resp
-  console.log 'promise origin', ev.origin
+  p.then (ev, resp) ->
+    console.log 'promise', resp
+    console.log 'promise origin', ev.origin
+
+setTimeout run, 0

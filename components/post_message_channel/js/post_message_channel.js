@@ -3,6 +3,16 @@
 
     var __slice = [].slice, __push = [].push, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
+    function log() {
+        if (arguments.length == 1) {
+            console.log(window.location.hostname, arguments[0])
+        } else if (arguments.length == 2) {
+            console.log(window.location.hostname, arguments[0], arguments[1])
+        } else if (arguments.length === 3) {
+            console.log(window.location.hostname, arguments[0], arguments[1], arguments[2])
+        }
+    }
+
     function Event() {
         this.length = 0;
     }
@@ -116,9 +126,8 @@
                 data = JSON.parse(ev.data);
             } catch(e) {}
 
-            // console.log('got data on: ', window.location.href, data);
-
             if (data) {
+                // console.log('got data on: ', window.location.href, data);
                 for (var i = channels.length - 1; i >= 0; i--) {
                     channels[i].message_callback(ev, data);
                 }
@@ -132,6 +141,7 @@
      * @param {[type]} opts [description]
      */
     function Channel(opts) {
+        var _this = this;
         opts || (opts = {});
 
         if (!(window.JSON && window.JSON.stringify && window.JSON.parse)) {
@@ -162,10 +172,19 @@
         this.origin = opts.origin || '*';
 
         this.responders = {
-            '_method_callback': this._method_callback
+            '_method_callback': this._method_callback,
+            '_syn': this._syn
         };
 
+        this._pending_messages = [];
+
         channels.push(this);
+
+        var ack_promise = this.trigger('_syn');
+
+        ack_promise.then(function(ev, resp) {
+            if (resp === 'ack') _this.is_connected();
+        });
     }
 
     Channel.prototype.match_origin = function(other_origin) {
@@ -193,9 +212,14 @@
 
         if (method_name && (method_name in this.responders)) {
             var args = data.args || [];
-            var method = this.responders[method_name];
 
-            var ret = method.apply(ev, args);
+            if (method_name === '_syn') {
+                var ret = this._syn();
+            } else {
+                var method = this.responders[method_name];
+
+                var ret = method.apply(ev, args);
+            }
 
             if (method !== '_method_callback' && data.cid && typeof ret !== "undefined") {
                 this.trigger_on_window(ev.source, '_method_callback', {
@@ -214,6 +238,25 @@
 
             promise.resolve.call(null, ev, data.response);
         }
+    };
+
+    Channel.prototype._syn = function() {
+        this.is_connected();
+        return 'ack';
+    };
+
+    Channel.prototype.is_connected = function() {
+        var args;
+        if (this.connected) return;
+        this.connected = true;
+
+        for (var i = 0; i < this._pending_messages.length; i+=1) {
+            args = this._pending_messages[i];
+
+            sendMessage.apply(null, args);
+        }
+
+        this._pending_messages = [];
     };
 
     Channel.prototype.method = function method(method_name) {
@@ -251,13 +294,23 @@
                 cid: dfd.cid
             });
 
-            win.postMessage(data, this.origin);
+            var send_args = [win, data, this.origin];
+
+            if (!this.connected && !(method_name === '_syn' || method_name === '_method_callback')) {
+                this._pending_messages.push(send_args);
+            } else {
+                sendMessage.apply(null, send_args)
+            }
         } catch(e) {
             dfd.reject(e);
         }
 
         return dfd.promise();
     };
+
+    function sendMessage(win, data, origin) {
+        win.postMessage(data, origin);
+    }
 
     Channel.prototype.on = function(method_name, cb) {
         if (method_name in this.responders) console.warn(method_name+' is already in the responders object, you\'re overriding');
