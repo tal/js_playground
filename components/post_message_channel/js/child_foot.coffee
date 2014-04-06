@@ -1,10 +1,13 @@
 run = ->
   window.channel = new Channel(window: window.top, namespace: 'test');
 
-  p = channel.trigger 'test', 1, 2
+  channel.on_connection ->
+    console.log('child on on_connection');
+    p = channel.trigger 'test', 1, 2
 
-  p.then (ev, resp) ->
-    console.log 'promise', resp
-    console.log 'promise origin', ev.origin
+    p.then (ev, resp) ->
+      console.log 'promise', resp
+      console.log 'promise origin', ev.origin
 
-setTimeout run, 0
+# setTimeout run, 1000
+run()
