@@ -11,6 +11,10 @@
     this._eval_send = this.channel.method('eval');
   }
 
+  Hypnosis.prototype.on_hypnotized = function(/* cb... */) {
+    return this.channel.on_connection.apply(this.channel, arguments);
+  }
+
   Hypnosis.prototype.remote_eval = function(/* args..., fn */) {
     var args, fn;
     args = __slice.call(arguments, 0);

@@ -483,7 +483,7 @@
         this.send_post_message = send_post_message;
 
         if (this._delayed_sent_messages) {
-            for (var i = this._delayed_sent_messages.length - 1; i >= 0; i--) {
+            for (var i = 0; i < this._delayed_sent_messages.length; i+=1) {
                 send_post_message.apply(this, this._delayed_sent_messages[i]);
             }
 
@@ -520,9 +520,9 @@
                 call;
             delete this._unanswered_calls[method_name];
 
-            for (var i = calls.length - 1; i >= 0; i--) {
+            for (var i = 0; i < calls.length; i+=1) {
                 call = calls[i]
-                this.call_responder.apply(this, call)
+                this.call_responder.apply(this, call);
             }
         }
     };
