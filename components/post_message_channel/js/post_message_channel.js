@@ -212,7 +212,7 @@
             }
         }
 
-        this.call_responder(method_name, ev.source, data);
+        this.call_responder(method_name, ev, data);
     };
 
     Channel.prototype.call_responder = function(method_name, ev, data) {
@@ -236,7 +236,7 @@
         }
 
         if (data.cid && method_name !== '_method_callback_responder') {
-            this.trigger_on_window(this.window || ev.source, '_method_callback_responder', {
+            this.trigger_on_window(ev.source, '_method_callback_responder', {
                 cid_response: data.cid,
                 response: ret
             });

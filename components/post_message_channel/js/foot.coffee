@@ -1,9 +1,9 @@
 iframe = document.getElementById 'my_iframe'
 
 run = ->
-  window.channel = new Channel(namespace: 'test', iframe: iframe);
+  window.channel = new Channel(namespace: 'test');
 
-  channel2 = new Channel(namespace: 'test2', iframe: iframe);
+  channel2 = new Channel(namespace: 'test2');
 
   channel2.on 'test', ->
     console.log 'hearing test2', arguments
@@ -18,4 +18,4 @@ run = ->
 
       return {resp: 'response'}
 
-setTimeout run, 5000
+setTimeout run, 1000
