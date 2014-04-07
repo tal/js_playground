@@ -41,7 +41,7 @@ method.
 
 ```js
 channel.on('get_user_name', function(user_id) {
-  user = Users.get(user_id);
+  var user = Users.get(user_id);
 
   if (user) {
     return user.name;
