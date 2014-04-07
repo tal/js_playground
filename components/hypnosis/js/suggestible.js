@@ -1,10 +1,11 @@
-(function(exports) {
+(function() {
   var sid = 0, sigs = {};
   function strToFn(str) {
      return new Function("return ("+str+");").call();
   }
 
   function Suggestible(options) {
+    options || (options = {});
     var _this = this;
     this.sid = ++sid;
 
@@ -12,11 +13,8 @@
 
     this.env = options.env || {};
 
-    this.channel = new Channel({
-      window: options.window,
-      namespace: '_hypnosis',
-      origin: options.origin
-    });
+    options.namespace || (options.namespace = '_hypnosis');
+    this.channel = new Channel(options);
 
     this.channel.on('eval', function(data) {
       if (data.fn) {
@@ -31,6 +29,10 @@
 
   function listen_to_top_frame() {
     new Suggestible({window: window.top});
+  }
+
+  function listen_to_parent_frame() {
+    new Suggestible({window: window.parent});
   }
 
   function listen_to_iframe(iframe) {
@@ -48,12 +50,17 @@
 
     if (!win) throw("no content window passed or determined");
 
-    var sug = new Suggestible({window: win});
-    sug.env.iframe = iframe;
+    new Suggestible({
+      window: win
+      env: {
+        iframe: iframe
+      }
+    });
   }
 
-  exports.Suggestible = {
+  this.Suggestible = {
     listen_to_iframe: listen_to_iframe,
-    listen_to_top_frame: listen_to_top_frame
+    listen_to_top_frame: listen_to_top_frame,
+    listen_to_parent_frame: listen_to_parent_frame
   };
-})(window);
+}).call(this);
