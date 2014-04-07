@@ -173,11 +173,12 @@
         this.origin = opts.origin || '*';
 
         this.responders = {
-            '_method_callback': this._method_callback,
+            '_method_callback_responder': this._method_callback_responder,
             '_syn': this._syn
         };
 
         this._on_connected = new Event();
+        this._unanswered_calls = {};
 
         channels.push(this);
 
@@ -211,28 +212,39 @@
             }
         }
 
-        if (method_name && (method_name in this.responders)) {
-            var args = data.args || [];
+        this.call_responder(method_name, ev.source, data);
+    };
 
-            if (method_name === '_syn') {
-                var ret = this._syn();
-            } else {
-                var method = this.responders[method_name];
+    Channel.prototype.call_responder = function(method_name, ev, data) {
+        var ret, method;
+        if (!method_name) return;
 
-                var ret = method.apply(ev, args);
-            }
+        data.args || (data.args = []);
 
-            if (method !== '_method_callback' && data.cid && typeof ret !== "undefined") {
-                this.trigger_on_window(ev.source, '_method_callback', {
-                    cid_response: data.cid,
-                    response: ret
-                });
-            }
+        method = this.responders[method_name];
+
+        if (!method) {
+            this._unanswered_calls[method_name] || (this._unanswered_calls[method_name] = []);
+            this._unanswered_calls[method_name].push(arguments);
+            return;
+        }
+
+        if (method_name === '_syn') {
+            ret = this._syn();
+        } else {
+            ret = method.apply(ev, data.args);
+        }
+
+        if (data.cid && method_name !== '_method_callback_responder') {
+            this.trigger_on_window(this.window || ev.source, '_method_callback_responder', {
+                cid_response: data.cid,
+                response: ret
+            });
         }
     };
 
     // Since this is being triggerd by message_callback 'this' should be the event;
-    Channel.prototype._method_callback = function(data) {
+    Channel.prototype._method_callback_responder = function(data) {
         var ev = this;
         if (data.cid_response && (data.cid_response in promises)) {
             var promise = promises[data.cid_response];
@@ -300,13 +312,28 @@
         return dfd.promise();
     };
 
+    Channel.prototype.listening_to = function(method_name) {
+        return (method_name in this.responders);
+    };
+
     Channel.prototype.on = function(method_name, cb) {
-        if (method_name in this.responders) console.warn(method_name+' is already in the responders object, you\'re overriding');
+        if (method_name in this.responders) throw('already listening to this method, turn it off first');
         this.responders[method_name] = cb;
+
+        if (this._unanswered_calls[method_name]) {
+            var calls = this._unanswered_calls[method_name],
+                call;
+            delete this._unanswered_calls[method_name];
+
+            for (var i = calls.length - 1; i >= 0; i--) {
+                call = calls[i]
+                this.call_responder.apply(this, call)
+            }
+        }
     };
 
     Channel.prototype.off = function(method_name) {
-        if (method_name == '_method_callback') throw 'cannot disable the method callback responder';
+        if (method_name == '_method_callback_responder') throw('cannot disable the method callback responder');
         delete this.responders[method_name];
     }
 

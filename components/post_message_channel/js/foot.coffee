@@ -8,8 +8,9 @@ run = ->
     channel.on 'test', ->
       console.log 'hearing test', arguments
 
-      console.log 'hearing origin', this.origin
+      # console.log 'hearing origin', this.origin
 
       return {resp: 'response'}
 
-setTimeout run, 1000
+setTimeout run, 0
+# run()

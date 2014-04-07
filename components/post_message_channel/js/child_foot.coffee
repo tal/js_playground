@@ -7,7 +7,7 @@ run = ->
 
     p.then (ev, resp) ->
       console.log 'promise', resp
-      console.log 'promise origin', ev.origin
+      # console.log 'promise origin', ev.origin
 
-# setTimeout run, 1000
-run()
+setTimeout run, 1000
+# run()
