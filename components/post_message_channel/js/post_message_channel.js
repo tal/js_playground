@@ -136,13 +136,7 @@
         },false);
     })();
 
-
-    /**
-     * [Channel description]
-     * @param {[type]} opts [description]
-     */
     function Channel(opts) {
-        var _this = this;
         opts || (opts = {});
 
         if (!(window.JSON && window.JSON.stringify && window.JSON.parse)) {
@@ -184,9 +178,9 @@
 
         var ack_promise = this.trigger('_syn');
 
-        ack_promise.then(function(ev, resp) {
-            if (resp === 'ack') _this._is_connected();
-        });
+        ack_promise.then(__bind(function(ev, resp) {
+            if (resp === 'ack') this._is_connected();
+        }, this));
     }
 
     Channel.prototype.match_origin = function(other_origin) {
@@ -259,8 +253,8 @@
     };
 
     Channel.prototype._is_connected = function() {
-        if (this._connected) return;
-        this._connected = true;
+        if (this.connected) return;
+        this.connected = true;
         this._on_connected.trigger(this);
     };
 
