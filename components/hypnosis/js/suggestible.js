@@ -16,7 +16,7 @@
     options.namespace || (options.namespace = '_hypnosis');
     this.channel = new Channel(options);
 
-    this.channel.on('eval', function(data) {
+    this.channel.listen_to('eval', function(data) {
       if (data.fn) {
         var args = data.args || [];
         fn = strToFn(data.fn);

@@ -92,10 +92,3 @@ channel.on_connection(function(connection) {
 
 If you want you can see if the channel is connected by checking the `connected` parameter on
 the connection instance.
-
-
-TODO
-======
-
-* Make a parameter on the channel that forces the channel to wait for a connection to send
-any messages

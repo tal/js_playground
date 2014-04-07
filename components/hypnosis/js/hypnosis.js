@@ -7,6 +7,8 @@
     options.namespace || (options.namespace = '_hypnosis');
 
     this.channel = new Channel(options);
+
+    this._eval_send = this.channel.method('eval');
   }
 
   Hypnosis.prototype.remote_eval = function(/* args..., fn */) {
@@ -14,7 +16,7 @@
     args = __slice.call(arguments, 0);
     fn = args.pop();
 
-    return this.channel.trigger('eval', {
+    return this._eval_send({
       fn: fn.toString(),
       args: args
     });

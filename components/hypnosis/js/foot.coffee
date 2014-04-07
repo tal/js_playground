@@ -13,3 +13,10 @@ window.test = hyp.remote_function (color) ->
   this.last_call_at = new Date();
   # title.innerText = "I just set you #{(new Date()).toString()}";
   return new Date().getTime();
+
+test('red')
+test('blue')
+
+setTimeout ->
+  test('purple')
+, 5000

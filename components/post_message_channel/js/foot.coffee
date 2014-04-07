@@ -5,17 +5,17 @@ run = ->
 
   channel2 = new Channel(namespace: 'test2');
 
-  channel2.on 'test', ->
+  channel2.listen_to 'test', ->
     console.log 'hearing test2', arguments
     return {resp: 'response2'}
 
   channel.on_connection ->
     console.log('parent on on_connection');
-    channel.on 'test', ->
+    channel.listen_to 'test', ->
       console.log 'hearing test', arguments
 
       # console.log 'hearing origin', this.origin
 
       return {resp: 'response'}
 
-setTimeout run, 1000
+setTimeout run, 0
