@@ -49,7 +49,8 @@ channel.on('get_user_name', function(user_id) {
 });
 ```
 
-The return of a method gets passed back to the promise created by the event trigger (explained further later);
+The return of a method gets passed back to the promise created by the event trigger
+(explained further later);
 
 ### Sending
 
@@ -88,3 +89,13 @@ channel.on_connection(function(connection) {
   connection.trigger('resize_iframe', 123, 808);
 });
 ```
+
+If you want you can see if the channel is connected by checking the `connected` parameter on
+the connection instance.
+
+
+TODO
+======
+
+* Make a parameter on the channel that forces the channel to wait for a connection to send
+any messages
