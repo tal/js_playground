@@ -51,7 +51,7 @@
     if (!win) throw("no content window passed or determined");
 
     new Suggestible({
-      window: win
+      window: win,
       env: {
         iframe: iframe
       }

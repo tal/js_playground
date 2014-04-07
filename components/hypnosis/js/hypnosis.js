@@ -10,9 +10,9 @@
   }
 
   Hypnosis.prototype.remote_eval = function(/* args..., fn */) {
-    var args, fn, _i;
-    args = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []);
-    fn = fn = arguments[_i++];
+    var args, fn;
+    args = __slice.call(arguments, 0);
+    fn = args.pop();
 
     return this.channel.trigger('eval', {
       fn: fn.toString(),
@@ -24,7 +24,7 @@
     var _this = this;
 
     function remote_function() {
-      var args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      var args = __slice.call(arguments, 0);
       args.push(fn);
       return _this.remote_eval.apply(_this, args);
     }
