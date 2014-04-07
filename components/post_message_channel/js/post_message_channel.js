@@ -1,6 +1,23 @@
 (function() {
     'use strict';
 
+    var JSON = window.JSON;
+
+    /**
+     * If not apropriate json object then try to get JSON from a clean window
+     * built from an iframe.
+     *
+     * Some old frameworks include their own incompatible JSON libraries
+     */
+    if (!(JSON && JSON.stringify && JSON.parse)) {
+        var iframe = document.createElement('iframe');
+        document.body.appendChild(iframe);
+
+        JSON = iframe.contentWindow.JSON;
+
+        document.body.removeChild(iframe);
+    }
+
     var __slice = [].slice, __push = [].push, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
     function log() {
@@ -186,7 +203,7 @@
     function Channel(opts) {
         opts || (opts = {});
 
-        if (!(window.JSON && window.JSON.stringify && window.JSON.parse)) {
+        if (!(JSON && JSON.stringify && JSON.parse)) {
             throw('Must have JSON parsing and stringify');
         }
 
