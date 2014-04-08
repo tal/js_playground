@@ -13,6 +13,7 @@
  *  When a channel is made in the child frame it will send a syn of its own.
  *  Once a syn is heard an ack is sent back and both sides mark themselves as
  *  connected any queued messages will be sent.
+ *
  * ⌈------------------⌉            ⌈------------------⌉
  * |      Parent      |   syn      |       Child      |
  * |      Channel     | ---------> |      Channel     |
@@ -39,7 +40,8 @@
      * If not apropriate json object then try to get JSON from a clean window
      * built from an iframe.
      *
-     * Some old frameworks include their own incompatible JSON libraries
+     * Some old frameworks include their own incompatible JSON libraries, lookin
+     * at you mootools.
      */
     if (!(JSON && JSON.stringify)) {
         var iframe = document.createElement('iframe');
@@ -110,6 +112,13 @@
 
 
     /**
+     * Special deferred object which behaves somewhat similar to jQuery's
+     * deferred object.
+     *
+     * It's limitations are that it doesn't allow chaining like most deferred.
+     *
+     * Basically it just has fail/resolved events that one of which can be triggered.
+     *
      * @constructor
      */
     function Deferred() {
