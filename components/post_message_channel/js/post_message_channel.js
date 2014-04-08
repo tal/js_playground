@@ -1,3 +1,35 @@
+/**
+ *
+ *  Upon creation of the channel it will send a syn request to the other side of the channel.
+ *  In this case there's no other channel listening yet so no response has been given.
+ * ⌈------------------⌉
+ * |      Parent      |     syn
+ * |      Channel     |  --------->
+ * ⌊------------------⌋
+ *
+ *  If no connection has been made the channel queues up any messages to be sent waiting
+ *  for a connection.
+ *
+ *  When a channel is made in the child frame it will send a syn of its own.
+ *  Once a syn is heard an ack is sent back and both sides mark themselves as
+ *  connected any queued messages will be sent.
+ * ⌈------------------⌉            ⌈------------------⌉
+ * |      Parent      |   syn      |       Child      |
+ * |      Channel     | ---------> |      Channel     |
+ * |                  |      ack   |                  |
+ * |                  | <--------- |                  |
+ * |                  |   msg      |                  |
+ * |                  | ---------> |                  |
+ * |                  |   msg      |                  |
+ * |                  | ---------> |                  |
+ * |                  |       rsp  |                  |
+ * |                  | <--------- |                  |
+ * |                  |       rsp  |                  |
+ * |                  | <--------- |                  |
+ * |                  |            |                  |
+ * ⌊------------------⌋            ⌊------------------⌋
+ */
+
 (function() {
     'use strict';
 
