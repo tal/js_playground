@@ -9,7 +9,7 @@
      *
      * Some old frameworks include their own incompatible JSON libraries
      */
-    if (!(JSON && JSON.stringify && JSON.parse)) {
+    if (!(JSON && JSON.stringify)) {
         var iframe = document.createElement('iframe');
         document.body.appendChild(iframe);
 
@@ -52,7 +52,7 @@
 
     Event.prototype.push = function() {
         if (this.triggered_with) {
-            var args = __slice.call(arguments, 0);
+            var args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
 
             for (var i = 0; i < args.length; i+=1) {
                 args[i].apply(null, this.triggered_with);
@@ -63,7 +63,7 @@
     };
 
     Event.prototype.trigger = function() {
-        var args = __slice.call(arguments, 0);
+        var args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
 
         var len = this.length;
 
@@ -103,19 +103,36 @@
     };
 
     Deferred.prototype.resolve = function() {
+        if (this.resolved || this.rejected) return;
         this._on_resolved.trigger.apply(this._on_resolved, arguments);
+        this.resolved = true;
         return this;
     };
 
     Deferred.prototype.reject = function() {
+        if (this.resolved || this.rejected) return;
         this._on_rejected.trigger.apply(this._on_rejected, arguments);
+        this.rejected = true;
         return this;
     };
 
+    Deferred.prototype.reject_timeout = function() {
+        var args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        var time = args.shift();
+
+        setTimeout(__bind(function() {
+            this.reject.apply(this,args);
+        }, this), time);
+
+        return this;
+    }
+
     Deferred.prototype.promise = function() {
-        var _this = this, promise;
+        var _this = this;
 
         function Promise() {
+            var promise = this;
+
             this.fail = function fail() {
                 _this.fail.apply(_this, arguments);
                 return promise;
@@ -127,6 +144,13 @@
             }
 
             this.success = this.then;
+
+            this.reject_timeout = function reject_timeout() {
+                _this.reject_timeout.apply(_this, arguments);
+                return promise;
+            }
+
+            this.cid = _this.cid;
         }
 
         return new Promise();
@@ -222,10 +246,6 @@
         }
 
         this.window = opts.window;
-
-        if (this.window && this.window === window) {
-            throw('Cannot send messages to one\'s self');
-        }
 
         this.namespace = opts.namespace ? opts.namespace+':' : '';
         this.origin = opts.origin || '*';
@@ -415,7 +435,7 @@
      */
     Channel.prototype.send = function send(/* method_name, args */) {
         if (!this.window) throw('no window specified on channel');
-        var args = __slice.call(arguments, 0);
+        var args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         args.unshift(this.window);
         return this.send_to_window.apply(this,args);
     };
@@ -529,6 +549,17 @@
      * @param  {Function} cb
      */
     Channel.prototype.listen_to = function(method_name, cb) {
+
+        if (!cb) {
+            var events = method_name;
+            for (method_name in events) {
+                if (events.hasOwnProperty(method_name)) {
+                    this.listen_to(method_name, events[method_name]);
+                }
+            }
+            return;
+        }
+
         if (method_name in this.responders) throw('already listening to this method, turn it off first');
         this.responders[method_name] = cb;
 
